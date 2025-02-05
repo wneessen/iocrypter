@@ -88,7 +88,6 @@ func TestArgon2Settings_Encode(t *testing.T) {
 		if err == nil {
 			t.Errorf("expected encoding to fail")
 		}
-		t.Log(err)
 	})
 }
 
