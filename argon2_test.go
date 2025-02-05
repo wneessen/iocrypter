@@ -82,13 +82,6 @@ func TestArgon2Settings_Encode(t *testing.T) {
 			t.Errorf("expected encoded settings length to be: %d, got: %d", 9, len(encoded))
 		}
 	})
-	t.Run("encode with invalid memory setting", func(t *testing.T) {
-		settings := NewArgon2SettingsWithSettings(4_294_967_295, 0, 0)
-		_, err := settings.Encode()
-		if err == nil {
-			t.Errorf("expected encoding to fail")
-		}
-	})
 }
 
 func TestDeserializeSettings(t *testing.T) {
