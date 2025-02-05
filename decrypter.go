@@ -18,6 +18,9 @@ import (
 
 func NewDecrypter(r io.Reader, password []byte) (io.ReadCloser, error) {
 	aesKey, hmacKey, iv, header, err := readParameters(r, password)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read encryption parameters: %w", err)
+	}
 	hasher := hmac.New(hashFunc, hmacKey)
 	hasher.Write(header)
 
@@ -44,7 +47,7 @@ func NewDecrypter(r io.Reader, password []byte) (io.ReadCloser, error) {
 	buffer := bufio.NewReaderSize(r, chunkSize)
 	for {
 		data, err := buffer.Peek(chunkSize)
-		if err != nil && err != io.EOF {
+		if err != nil && !errors.Is(err, io.EOF) {
 			return nil, fmt.Errorf("failed to read bytes from reader: %w", err)
 		}
 
