@@ -43,8 +43,15 @@ var (
 )
 
 var (
-	ErrMissingData          = errors.New("not enough data to decrypt, ciphertext might be corrupted")
+	// ErrMissingData indicates insufficient data to decrypt, suggesting the ciphertext may be
+	// incomplete or corrupted.
+	ErrMissingData = errors.New("not enough data to decrypt, ciphertext might be corrupted")
+
+	// ErrFailedAuthentication indicates that authentication has failed due to possible data tampering,
+	// corruption, or an incorrect password.
 	ErrFailedAuthentication = errors.New("authentication failed, data might have been tampered, corrupted " +
 		"or password is incorrect")
+
+	// ErrWriteAfterRead indicates that writing to a hashReadWriter instance is not allowed after a read operation.
 	ErrWriteAfterRead = errors.New("writing to hashReadWriter after read is not allowed")
 )
