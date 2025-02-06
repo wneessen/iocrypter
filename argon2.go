@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	// defaultArgon2Treads defines the default number of threads for the Argon2 key
+	// defaultArgon2Threads defines the default number of threads for the Argon2 key
 	// derivation function.
-	defaultArgon2Treads = 4
+	defaultArgon2Threads = 4
 
 	// defaultArgon2Memory defines the default memory in kibibytes for the Argon2 key
 	// derivation function.
@@ -36,7 +36,7 @@ type Argon2Settings struct {
 
 // NewArgon2Settings creates a new Argon2Settings instance with default parameters for time, memory, and threads.
 func NewArgon2Settings() Argon2Settings {
-	return NewArgon2SettingsWithSettings(defaultArgon2Time, defaultArgon2Memory, defaultArgon2Treads)
+	return NewArgon2SettingsWithSettings(defaultArgon2Time, defaultArgon2Memory, defaultArgon2Threads)
 }
 
 // NewArgon2SettingsWithSettings creates a new Argon2Settings instance with the provided time, memory,
