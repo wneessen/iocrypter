@@ -10,11 +10,18 @@ import (
 	"crypto/cipher"
 	"crypto/hmac"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"io"
 )
 
+// ErrPassPhraseEmpty is an error indicating that the provided passphrase is empty and must be non-empty.
+var ErrPassPhraseEmpty = errors.New("passphrase must not be empty")
+
 func NewEncrypter(r io.Reader, pass []byte) (io.Reader, error) {
+	if len(pass) == 0 {
+		return nil, ErrPassPhraseEmpty
+	}
 	settings := NewArgon2Settings()
 	return NewEncrypterWithSettings(r, pass, settings)
 }
@@ -33,7 +40,7 @@ func NewEncrypterWithSettings(r io.Reader, password []byte, settings Argon2Setti
 
 	iv := make([]byte, blockSize)
 	if _, err = io.ReadFull(rand.Reader, iv); err != nil {
-		return nil, fmt.Errorf("failed to generate random salt: %w", err)
+		return nil, fmt.Errorf("failed to generate random iv: %w", err)
 	}
 
 	header := make([]byte, 0)
