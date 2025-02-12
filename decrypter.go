@@ -16,6 +16,10 @@ import (
 	"os"
 )
 
+// ErrTooLessRounds indicates that the provided number of rounds is smaller than the minimum
+// required threshold.
+var ErrTooLessRounds = errors.New("number of rounds too small")
+
 func NewDecrypter(r io.Reader, password []byte) (io.ReadCloser, error) {
 	aesKey, hmacKey, iv, header, err := readParameters(r, password)
 	if err != nil {
@@ -115,6 +119,9 @@ func readParameters(r io.Reader, password []byte) ([]byte, []byte, []byte, []byt
 	header.Write(settingsSerialized)
 	header.Write(salt)
 	header.Write(iv)
+	if settings.Time < 1 {
+		return nil, nil, nil, nil, ErrTooLessRounds
+	}
 	aesKey, hmacKey := DeriveKeys(password, salt, settings)
 
 	return aesKey, hmacKey, iv, header.Bytes(), nil

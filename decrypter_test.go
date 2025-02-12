@@ -57,4 +57,88 @@ func TestNewDecrypter(t *testing.T) {
 			t.Errorf("expected error to be %s, got %s", ErrFailedAuthentication, err)
 		}
 	})
+	t.Run("decryption with invalid argon2 settings should fail", func(t *testing.T) {
+		ciphertextbuf := bytes.NewBuffer([]byte{00, 01, 02, 03})
+		_, err := NewDecrypter(ciphertextbuf, testPassword)
+		if err == nil {
+			t.Errorf("expected decryption to fail with invalid argon2 settings")
+		}
+		expErr := "failed to read Argon2 settings"
+		if !strings.Contains(err.Error(), expErr) {
+			t.Errorf("expected error to contain %s, got %s", expErr, err)
+		}
+	})
+	t.Run("decryption with invalid salt should fail", func(t *testing.T) {
+		settings, err := NewArgon2Settings().Encode()
+		if err != nil {
+			t.Fatalf("failed to serialize Argon2 settings: %s", err)
+		}
+		ciphertextbuf := bytes.NewBuffer(append(settings, []byte{00, 01, 02, 03}...))
+		_, err = NewDecrypter(ciphertextbuf, testPassword)
+		if err == nil {
+			t.Errorf("expected decryption to fail with invalid salt")
+		}
+		expErr := "failed to read salt"
+		if !strings.Contains(err.Error(), expErr) {
+			t.Errorf("expected error to contain %s, got %s", expErr, err)
+		}
+	})
+	t.Run("decryption with invalid iv should fail", func(t *testing.T) {
+		settings, err := NewArgon2Settings().Encode()
+		if err != nil {
+			t.Fatalf("failed to serialize Argon2 settings: %s", err)
+		}
+		salt := make([]byte, saltSize)
+		cipherdata := append(settings, salt...)
+		ciphertextbuf := bytes.NewBuffer(append(cipherdata, []byte{00, 01, 02, 03}...))
+		_, err = NewDecrypter(ciphertextbuf, testPassword)
+		if err == nil {
+			t.Errorf("expected decryption to fail with invalid salt")
+		}
+		expErr := "failed to read IV"
+		if !strings.Contains(err.Error(), expErr) {
+			t.Errorf("expected error to contain %s, got %s", expErr, err)
+		}
+	})
+	t.Run("decryption with tampered ciphertext should fail", func(t *testing.T) {
+		ciphertextbuf := bytes.NewBuffer(ciphertext[:len(ciphertext)-1])
+		_, err = NewDecrypter(ciphertextbuf, testPassword)
+		if err == nil {
+			t.Errorf("expected decryption to fail with invalid salt")
+		}
+		if !errors.Is(err, ErrFailedAuthentication) {
+			t.Errorf("expected error to be %s, got %s", ErrFailedAuthentication, err)
+		}
+	})
+	t.Run("decryption with missing checksum should fail", func(t *testing.T) {
+		ciphertextbuf := bytes.NewBuffer(ciphertext[:len(ciphertext)-hmacSize])
+		_, err = NewDecrypter(ciphertextbuf, testPassword)
+		if err == nil {
+			t.Errorf("expected decryption to fail with invalid salt")
+		}
+		if !errors.Is(err, ErrMissingData) {
+			t.Errorf("expected error to be %s, got %s", ErrMissingData, err)
+		}
+	})
+	t.Run("decryption on broken reader should fail", func(t *testing.T) {
+		ciphertextbuf := &failReadWriter{failOnRead: 3}
+		ciphertextbuf.readFunc = func(p []byte) (int, error) {
+			settings, err := NewArgon2Settings().Encode()
+			if err != nil {
+				t.Fatalf("failed to serialize Argon2 settings: %s", err)
+			}
+			if ciphertextbuf.currentRead-1 == 0 {
+				copy(p, settings)
+			}
+			return len(p), nil
+		}
+		_, err = NewDecrypter(ciphertextbuf, testPassword)
+		if err == nil {
+			t.Errorf("expected decryption to fail with invalid salt")
+		}
+		if !strings.Contains(err.Error(), "intentionally failing") {
+			t.Errorf("expected error to contain 'intentionally failing', got %s", err)
+		}
+	})
+
 }

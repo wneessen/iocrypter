@@ -112,6 +112,7 @@ func TestNewEncrypterWithSettings(t *testing.T) {
 type failReadWriter struct {
 	failOnRead  uint8
 	currentRead uint8
+	readFunc    func([]byte) (int, error)
 }
 
 // Read implements the io.Reader interface for the failReadWriter type
@@ -120,6 +121,9 @@ func (r *failReadWriter) Read(p []byte) (int, error) {
 		return 0, errors.New("intentionally failing")
 	}
 	r.currentRead++
+	if r.readFunc != nil {
+		return r.readFunc(p)
+	}
 	return len(p), nil
 }
 
