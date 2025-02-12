@@ -58,7 +58,7 @@ func TestNewDecrypter(t *testing.T) {
 		}
 	})
 	t.Run("decryption with invalid argon2 settings should fail", func(t *testing.T) {
-		ciphertextbuf := bytes.NewBuffer([]byte{00, 01, 02, 03})
+		ciphertextbuf := bytes.NewBuffer([]byte{0o0, 0o1, 0o2, 0o3})
 		_, err := NewDecrypter(ciphertextbuf, testPassword)
 		if err == nil {
 			t.Errorf("expected decryption to fail with invalid argon2 settings")
@@ -73,7 +73,7 @@ func TestNewDecrypter(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to serialize Argon2 settings: %s", err)
 		}
-		ciphertextbuf := bytes.NewBuffer(append(settings, []byte{00, 01, 02, 03}...))
+		ciphertextbuf := bytes.NewBuffer(append(settings, []byte{0o0, 0o1, 0o2, 0o3}...))
 		_, err = NewDecrypter(ciphertextbuf, testPassword)
 		if err == nil {
 			t.Errorf("expected decryption to fail with invalid salt")
@@ -90,7 +90,7 @@ func TestNewDecrypter(t *testing.T) {
 		}
 		salt := make([]byte, saltSize)
 		cipherdata := append(settings, salt...)
-		ciphertextbuf := bytes.NewBuffer(append(cipherdata, []byte{00, 01, 02, 03}...))
+		ciphertextbuf := bytes.NewBuffer(append(cipherdata, []byte{0o0, 0o1, 0o2, 0o3}...))
 		_, err = NewDecrypter(ciphertextbuf, testPassword)
 		if err == nil {
 			t.Errorf("expected decryption to fail with invalid salt")
@@ -140,5 +140,4 @@ func TestNewDecrypter(t *testing.T) {
 			t.Errorf("expected error to contain 'intentionally failing', got %s", err)
 		}
 	})
-
 }
