@@ -89,6 +89,9 @@ func NewDecrypter(r io.Reader, password []byte) (io.ReadCloser, error) {
 // readParameters reads and deserializes the Argon2 settings, salt, IV, and derives keys from the provided
 // reader and password.
 func readParameters(r io.Reader, password []byte) ([]byte, []byte, []byte, []byte, error) {
+	if len(password) == 0 {
+		return nil, nil, nil, nil, ErrPassPhraseEmpty
+	}
 	settingsSerialized := make([]byte, 9)
 	if _, err := io.ReadFull(r, settingsSerialized); err != nil {
 		return nil, nil, nil, nil, fmt.Errorf("failed to read Argon2 settings: %w", err)
