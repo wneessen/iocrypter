@@ -93,7 +93,7 @@ func TestNewDecrypter(t *testing.T) {
 		ciphertextbuf := bytes.NewBuffer(append(cipherdata, []byte{0o0, 0o1, 0o2, 0o3}...))
 		_, err = NewDecrypter(ciphertextbuf, testPassword)
 		if err == nil {
-			t.Errorf("expected decryption to fail with invalid salt")
+			t.Errorf("expected decryption to fail with invalid IV")
 		}
 		expErr := "failed to read IV"
 		if !strings.Contains(err.Error(), expErr) {
@@ -104,7 +104,7 @@ func TestNewDecrypter(t *testing.T) {
 		ciphertextbuf := bytes.NewBuffer(ciphertext[:len(ciphertext)-1])
 		_, err = NewDecrypter(ciphertextbuf, testPassword)
 		if err == nil {
-			t.Errorf("expected decryption to fail with invalid salt")
+			t.Errorf("expected decryption to fail with tampered ciphertext")
 		}
 		if !errors.Is(err, ErrFailedAuthentication) {
 			t.Errorf("expected error to be %s, got %s", ErrFailedAuthentication, err)
@@ -114,7 +114,7 @@ func TestNewDecrypter(t *testing.T) {
 		ciphertextbuf := bytes.NewBuffer(ciphertext[:len(ciphertext)-hmacSize])
 		_, err = NewDecrypter(ciphertextbuf, testPassword)
 		if err == nil {
-			t.Errorf("expected decryption to fail with invalid salt")
+			t.Errorf("expected decryption to fail with missing checksum")
 		}
 		if !errors.Is(err, ErrMissingData) {
 			t.Errorf("expected error to be %s, got %s", ErrMissingData, err)
@@ -134,10 +134,32 @@ func TestNewDecrypter(t *testing.T) {
 		}
 		_, err = NewDecrypter(ciphertextbuf, testPassword)
 		if err == nil {
-			t.Errorf("expected decryption to fail with invalid salt")
+			t.Errorf("expected decryption to fail with broken reader")
 		}
 		if !strings.Contains(err.Error(), "intentionally failing") {
 			t.Errorf("expected error to contain 'intentionally failing', got %s", err)
+		}
+	})
+	t.Run("decryption on broken reader with too low argon2 rounds should fail", func(t *testing.T) {
+		ciphertextbuf := &failReadWriter{failOnRead: 3}
+		ciphertextbuf.readFunc = func(p []byte) (int, error) {
+			settings := NewArgon2Settings()
+			settings.Time = 0
+			settingsBytes, err := settings.Encode()
+			if err != nil {
+				t.Fatalf("failed to serialize Argon2 settings: %s", err)
+			}
+			if ciphertextbuf.currentRead-1 == 0 {
+				copy(p, settingsBytes)
+			}
+			return len(p), nil
+		}
+		_, err = NewDecrypter(ciphertextbuf, testPassword)
+		if err == nil {
+			t.Errorf("expected decryption to fail with too low argon2 rounds")
+		}
+		if !errors.Is(err, ErrTooLessRounds) {
+			t.Errorf("expected error to be %s, got %s", ErrTooLessRounds, err)
 		}
 	})
 }
