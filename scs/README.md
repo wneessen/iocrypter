@@ -1,4 +1,5 @@
-# dbenc - SCS Codec Interface
+# scs_codec
+## SCS Codec Interface for session encryption and authentication using iocrypter
 
 ## Overview
 
