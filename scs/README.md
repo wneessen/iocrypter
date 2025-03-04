@@ -42,4 +42,4 @@ func main() {
 
 ## License
 
-This package is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This package is licensed under the MIT License. See [LICENSE](../LICENSE) for details.
