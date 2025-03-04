@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-// Package scs_codec implements the Codec interface of Alex Edward's SCS Session Management
+// Package scs implements the Codec interface of Alex Edward's SCS Session Management
 // package so that iocrypter can be used for encrypting/authenticating session data before
 // storing them in memory or in any other corrsponding session storage that is supported by
 // SCS.
-package scs_codec
+package scs
 
 import (
 	"bytes"

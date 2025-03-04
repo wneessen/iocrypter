@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-package scs_codec
+package scs
 
 import (
 	"bytes"

@@ -4,12 +4,12 @@ SPDX-FileCopyrightText: Winni Neessen <wn@neessen.dev>
 SPDX-License-Identifier: MIT
 -->
 
-# scs_codec
+# scs
 ## SCS Codec Interface for session encryption and authentication using iocrypter
 
 ## Overview
 
-The `scs_codec` package provides an implementation of the Codec interface
+The `scs` package provides an implementation of the Codec interface
 for [Alex Edwards' SCS: HTTP Session Management](https://github.com/alexedwards/scs). It enables the use
 of [iocrypter](https://github.com/wneessen/iocrypter) to encrypt and authenticate session data before storing 
 them in any supported SCS session storage.
@@ -26,7 +26,7 @@ import (
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
-	scscrypter "github.com/wneessen/iocrypter/scs_codec/scs"
+	scscrypter "github.com/wneessen/iocrypter/scs"
 )
 
 func main() {
