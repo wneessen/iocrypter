@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: Winni Neessen <wn@neessen.dev>
+
+SPDX-License-Identifier: MIT
+-->
+
 # scs_codec
 ## SCS Codec Interface for session encryption and authentication using iocrypter
 
