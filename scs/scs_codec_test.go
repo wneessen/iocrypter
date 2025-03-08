@@ -11,8 +11,15 @@ import (
 	"testing"
 	"time"
 
+	wa "github.com/wneessen/argon2"
+
 	"github.com/wneessen/iocrypter"
 )
+
+var testMagicBytes = []byte{
+	0x00, 0x00, 0x01, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x20, 0x00,
+	0x00, 0x00, 0x60, 0x00, 0x00, 0x00,
+}
 
 func TestNew(t *testing.T) {
 	t.Run("New with password succeeds", func(t *testing.T) {
@@ -55,8 +62,8 @@ func TestCodec_Encode(t *testing.T) {
 		if err != nil {
 			t.Errorf("encoding session data failed: %s", err)
 		}
-		if !bytes.Equal(encoded[:9], []byte{0x00, 0x00, 0x01, 0x00, 0x04, 0x01, 0x00, 0x00, 0x00}) {
-			t.Errorf("expected encoded data to start with magic bytes, got: %x", encoded[:9])
+		if !bytes.Equal(encoded[:wa.SerializedSettingsLength], testMagicBytes) {
+			t.Errorf("expected encoded data to start with magic bytes, got: %x", encoded[:wa.SerializedSettingsLength])
 		}
 	})
 	t.Run("encoding with nil data", func(t *testing.T) {
@@ -68,8 +75,8 @@ func TestCodec_Encode(t *testing.T) {
 		if err != nil {
 			t.Errorf("encoding session data failed: %s", err)
 		}
-		if !bytes.Equal(encoded[:9], []byte{0x00, 0x00, 0x01, 0x00, 0x04, 0x01, 0x00, 0x00, 0x00}) {
-			t.Errorf("expected encoded data to start with magic bytes, got: %x", encoded[:9])
+		if !bytes.Equal(encoded[:wa.SerializedSettingsLength], testMagicBytes) {
+			t.Errorf("expected encoded data to start with magic bytes, got: %x", encoded[wa.SerializedSettingsLength])
 		}
 	})
 	t.Run("encoding with type alias fails", func(t *testing.T) {
