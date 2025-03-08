@@ -6,7 +6,6 @@ package iocrypter
 
 import (
 	"bufio"
-	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/hmac"
@@ -14,6 +13,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	wa "github.com/wneessen/argon2"
 )
 
 // ErrTooLessRounds indicates that the provided number of rounds is smaller than the minimum
@@ -96,33 +97,30 @@ func readParameters(r io.Reader, password []byte) ([]byte, []byte, []byte, []byt
 	if len(password) == 0 {
 		return nil, nil, nil, nil, ErrPassPhraseEmpty
 	}
-	settingsSerialized := make([]byte, 9)
+	settingsSerialized := make([]byte, wa.SerializedSettingsLength)
 	if _, err := io.ReadFull(r, settingsSerialized); err != nil {
 		return nil, nil, nil, nil, fmt.Errorf("failed to read Argon2 settings: %w", err)
 	}
-	settings, err := DeserializeSettings(settingsSerialized)
-	if err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("failed to deserialize Argon2 settings: %w", err)
-	}
+	settings := wa.SettingsFromBytes(settingsSerialized)
 
-	salt := make([]byte, saltSize)
-	if _, err = io.ReadFull(r, salt); err != nil {
+	salt := make([]byte, settings.SaltLength)
+	if _, err := io.ReadFull(r, salt); err != nil {
 		return nil, nil, nil, nil, fmt.Errorf("failed to read salt: %w", err)
 	}
 
 	iv := make([]byte, blockSize)
-	if _, err = io.ReadFull(r, iv); err != nil {
+	if _, err := io.ReadFull(r, iv); err != nil {
 		return nil, nil, nil, nil, fmt.Errorf("failed to read IV: %w", err)
 	}
 
-	header := bytes.NewBuffer(nil)
-	header.Write(settingsSerialized)
-	header.Write(salt)
-	header.Write(iv)
+	header := make([]byte, len(settingsSerialized)+len(salt)+len(iv))
+	copy(header, settingsSerialized)
+	copy(header[len(settingsSerialized):], salt)
+	copy(header[len(settingsSerialized)+len(salt):], iv)
 	if settings.Time < 1 {
 		return nil, nil, nil, nil, ErrTooLessRounds
 	}
 	aesKey, hmacKey := DeriveKeys(password, salt, settings)
 
-	return aesKey, hmacKey, iv, header.Bytes(), nil
+	return aesKey, hmacKey, iv, header, nil
 }

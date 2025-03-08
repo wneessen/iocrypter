@@ -69,10 +69,7 @@ func TestNewDecrypter(t *testing.T) {
 		}
 	})
 	t.Run("decryption with invalid salt should fail", func(t *testing.T) {
-		settings, err := NewArgon2Settings().Encode()
-		if err != nil {
-			t.Fatalf("failed to serialize Argon2 settings: %s", err)
-		}
+		settings := testSettings.Serialize()
 		ciphertextbuf := bytes.NewBuffer(append(settings, []byte{0o0, 0o1, 0o2, 0o3}...))
 		_, err = NewDecrypter(ciphertextbuf, testPassword)
 		if err == nil {
@@ -84,10 +81,7 @@ func TestNewDecrypter(t *testing.T) {
 		}
 	})
 	t.Run("decryption with invalid iv should fail", func(t *testing.T) {
-		settings, err := NewArgon2Settings().Encode()
-		if err != nil {
-			t.Fatalf("failed to serialize Argon2 settings: %s", err)
-		}
+		settings := testSettings.Serialize()
 		salt := make([]byte, saltSize)
 		cipherdata := append(settings, salt...)
 		ciphertextbuf := bytes.NewBuffer(append(cipherdata, []byte{0o0, 0o1, 0o2, 0o3}...))
@@ -123,10 +117,7 @@ func TestNewDecrypter(t *testing.T) {
 	t.Run("decryption on broken reader should fail", func(t *testing.T) {
 		ciphertextbuf := &failReadWriter{failOnRead: 3}
 		ciphertextbuf.readFunc = func(p []byte) (int, error) {
-			settings, err := NewArgon2Settings().Encode()
-			if err != nil {
-				t.Fatalf("failed to serialize Argon2 settings: %s", err)
-			}
+			settings := testSettings.Serialize()
 			if ciphertextbuf.currentRead-1 == 0 {
 				copy(p, settings)
 			}
@@ -143,12 +134,9 @@ func TestNewDecrypter(t *testing.T) {
 	t.Run("decryption on broken reader with too low argon2 rounds should fail", func(t *testing.T) {
 		ciphertextbuf := &failReadWriter{failOnRead: 3}
 		ciphertextbuf.readFunc = func(p []byte) (int, error) {
-			settings := NewArgon2Settings()
+			settings := testSettings
 			settings.Time = 0
-			settingsBytes, err := settings.Encode()
-			if err != nil {
-				t.Fatalf("failed to serialize Argon2 settings: %s", err)
-			}
+			settingsBytes := settings.Serialize()
 			if ciphertextbuf.currentRead-1 == 0 {
 				copy(p, settingsBytes)
 			}

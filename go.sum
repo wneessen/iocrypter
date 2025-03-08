@@ -1,3 +1,5 @@
+github.com/wneessen/argon2 v0.0.2 h1:Rn7VkD65GUM0eU/n1YC9XzN9Ubl3JZadHGsHWRm8Su0=
+github.com/wneessen/argon2 v0.0.2/go.mod h1:m/jfA51r3VjxB2llJI6AeSek7rVL8FOcH1N5alNBGWM=
 golang.org/x/crypto v0.36.0 h1:AnAEvhDddvBdpY+uR+MyHmuZzzNqXSe/GvuDeob5L34=
 golang.org/x/crypto v0.36.0/go.mod h1:Y4J0ReaxCR1IMaabaSMugxJES1EpwhBHhv2bDHklZvc=
 golang.org/x/sys v0.31.0 h1:ioabZlmFYtWhL+TRYpcnNlLwhyxaM9kWTDEmfnprqik=

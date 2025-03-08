@@ -8,6 +8,9 @@ import (
 	"crypto/aes"
 	"crypto/sha512"
 	"errors"
+
+	wa "github.com/wneessen/argon2"
+	"golang.org/x/crypto/argon2"
 )
 
 const (
@@ -30,6 +33,18 @@ const (
 	// blockSize represents the size in bytes of a single block for the AES encryption
 	// algorithm.
 	blockSize = aes.BlockSize
+
+	// defaultArgon2Threads defines the default number of threads for the Argon2 key
+	// derivation function.
+	defaultArgon2Threads = 4
+
+	// defaultArgon2Memory defines the default memory in kibibytes for the Argon2 key
+	// derivation function.
+	defaultArgon2Memory = 64 * 1024
+
+	// defaultArgon2Time defines the default number of iterations for the Argon2 key
+	// derivation function.
+	defaultArgon2Time = 3
 )
 
 var (
@@ -55,3 +70,10 @@ var (
 	// ErrWriteAfterRead indicates that writing to a hashReadWriter instance is not allowed after a read operation.
 	ErrWriteAfterRead = errors.New("writing to hashReadWriter after read is not allowed")
 )
+
+// DeriveKeys will use Argon2id to derive a AES-256 and a HMAC key from the
+// given password and salt. It will use the given Argon2Settings for the key derivation.
+func DeriveKeys(password, salt []byte, settings wa.Settings) ([]byte, []byte) {
+	key := argon2.IDKey(password, salt, settings.Time, settings.Memory, settings.Threads, settings.KeyLength)
+	return key[:aesKeySize], key[aesKeySize : hmacKeySize+aesKeySize]
+}

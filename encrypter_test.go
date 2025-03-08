@@ -11,10 +11,19 @@ import (
 	"io"
 	"strings"
 	"testing"
+
+	wa "github.com/wneessen/argon2"
 )
 
-// testPassword is a constant string representing a password used for testing purposes.
-var testPassword = []byte(`:wPIuo[F#Gnh6*lmzc'_bmYpY!UV)Tt1`)
+var (
+	// testPassword is a constant string representing a password used for testing purposes.
+	testPassword = []byte(`:wPIuo[F#Gnh6*lmzc'_bmYpY!UV)Tt1`)
+
+	// testSettings initializes cryptographic settings using Argon2 parameters, salt size, and
+	// combined AES/HMAC key size.
+	testSettings = wa.NewSettings(defaultArgon2Memory, defaultArgon2Time, defaultArgon2Threads,
+		saltSize, aesKeySize+hmacSize)
+)
 
 func TestNewEncrypter(t *testing.T) {
 	t.Run("normal encrypter creation", func(t *testing.T) {
@@ -42,7 +51,8 @@ func TestNewEncrypter(t *testing.T) {
 func TestNewEncrypterWithSettings(t *testing.T) {
 	t.Run("normal encrypter creation", func(t *testing.T) {
 		buffer := bytes.NewBuffer(nil)
-		encrypter, err := NewEncrypterWithSettings(buffer, testPassword, NewArgon2Settings())
+		encrypter, err := NewEncrypterWithSettings(buffer, testPassword, defaultArgon2Memory,
+			defaultArgon2Time, defaultArgon2Threads)
 		if err != nil {
 			t.Fatalf("failed to create encrypter: %s", err)
 		}
@@ -56,7 +66,8 @@ func TestNewEncrypterWithSettings(t *testing.T) {
 		rand.Reader = &failReadWriter{failOnRead: 0}
 
 		buffer := bytes.NewBuffer(nil)
-		_, err := NewEncrypterWithSettings(buffer, testPassword, NewArgon2Settings())
+		_, err := NewEncrypterWithSettings(buffer, testPassword, defaultArgon2Memory,
+			defaultArgon2Time, defaultArgon2Threads)
 		if err == nil {
 			t.Fatal("expected encrypter creation to fail with broken random reader")
 		}
@@ -71,7 +82,8 @@ func TestNewEncrypterWithSettings(t *testing.T) {
 		rand.Reader = &failReadWriter{failOnRead: 1}
 
 		buffer := bytes.NewBuffer(nil)
-		_, err := NewEncrypterWithSettings(buffer, testPassword, NewArgon2Settings())
+		_, err := NewEncrypterWithSettings(buffer, testPassword, defaultArgon2Memory,
+			defaultArgon2Time, defaultArgon2Threads)
 		if err == nil {
 			t.Fatal("expected encrypter creation to fail with broken random reader")
 		}
@@ -82,7 +94,8 @@ func TestNewEncrypterWithSettings(t *testing.T) {
 	})
 	t.Run("encrypter fails encrypting into broken writer", func(t *testing.T) {
 		buffer := bytes.NewBufferString("This is a test")
-		encrypter, err := NewEncrypterWithSettings(buffer, testPassword, NewArgon2Settings())
+		encrypter, err := NewEncrypterWithSettings(buffer, testPassword, defaultArgon2Memory,
+			defaultArgon2Time, defaultArgon2Threads)
 		if err != nil {
 			t.Fatalf("failed to create encrypter: %s", err)
 		}
@@ -94,7 +107,8 @@ func TestNewEncrypterWithSettings(t *testing.T) {
 	})
 	t.Run("encrypter fails encrypting from broken reader", func(t *testing.T) {
 		reader := &failReadWriter{failOnRead: 0}
-		encrypter, err := NewEncrypterWithSettings(reader, testPassword, NewArgon2Settings())
+		encrypter, err := NewEncrypterWithSettings(reader, testPassword, defaultArgon2Memory,
+			defaultArgon2Time, defaultArgon2Threads)
 		if err != nil {
 			t.Fatalf("failed to create encrypter: %s", err)
 		}
