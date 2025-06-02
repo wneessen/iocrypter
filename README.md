@@ -17,12 +17,6 @@ for byte stream encryption.
 The [cmd/](cmd) directory holds two example implementations for tools that will read a file from
 disk and then en- or decrypt it accordingly.
 
-The [scs](scs) directory holds a package that provides an implementation of the
-[Codec interface](https://pkg.go.dev/github.com/alexedwards/scs/v2#Codec) for
-[Alex Edwards' SCS: HTTP Session Management](https://github.com/alexedwards/scs). It enables the use
-of iocrypter to encrypt and authenticate session data before storing them in any supported SCS
-session storage.
-
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
