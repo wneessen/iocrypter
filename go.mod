@@ -8,7 +8,7 @@ go 1.24
 
 require (
 	github.com/wneessen/argon2 v0.0.3
-	golang.org/x/crypto v0.39.0
+	golang.org/x/crypto v0.40.0
 )
 
-require golang.org/x/sys v0.33.0 // indirect
+require golang.org/x/sys v0.34.0 // indirect
