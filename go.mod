@@ -7,7 +7,7 @@ module github.com/wneessen/iocrypter
 go 1.25.0
 
 require (
-	github.com/wneessen/argon2 v0.0.3
+	github.com/wneessen/argon2 v0.0.4
 	golang.org/x/crypto v0.49.0
 )
 
