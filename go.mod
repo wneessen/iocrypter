@@ -4,10 +4,10 @@
 
 module github.com/wneessen/iocrypter
 
-go 1.26.0
+go 1.26.10
 
 require (
-	github.com/wneessen/argon2 v0.0.4
+	github.com/wneessen/argon2 v0.0.5
 	golang.org/x/crypto v0.58.0
 )
 
